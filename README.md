@@ -12,7 +12,7 @@
 
 ## Description
 
-Guitar chords for famous songs - includes tabs, sounds and lyrics
+Explorer Movies from IMDB
 
 ## How this looks
 
