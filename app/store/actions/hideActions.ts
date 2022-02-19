@@ -1,6 +1,10 @@
-import { FoundMovie } from 'models/reducers/favorite'
+import { FoundMovie } from 'models/movie'
 
 import * as types from './types'
+
+export interface HideToggleActionInterface {
+  hidden: { [id: string]: FoundMovie }
+}
 
 export function setHidden(value: FoundMovie[]) {
   return {

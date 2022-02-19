@@ -1,34 +1,37 @@
 import * as React from 'react'
 import { useCallback } from 'react'
 import { StatusBar } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import ThemeController from 'components/blocks/ThemeController'
+import { ThemeController } from 'components/blocks'
 import { FoundMovie } from 'models/movie'
-import { IFavoriteReducerState, IHideReducerState, IThemeReducerState } from 'models/reducers'
 import { DarkTheme, DefaultTheme, ThemeProvider as ThemeProviderPaper } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
 import { ThemeProvider } from 'styled-components/native'
 
-import { useTheme } from 'services/store/theme'
+import { useTheme } from 'services/theme'
 
 import * as favoriteActions from 'store/actions/favoriteActions'
 import * as hiddenActions from 'store/actions/hideActions'
+import { FavoriteReducerStateInterface } from 'store/reducers/favoriteReducer'
+import { HideReducerStateInterface } from 'store/reducers/hideReducer'
+import { ThemeReducerStateInterface } from 'store/reducers/themeReducer'
 
-import MainScreen from 'screens/Main'
-import MovieScreen from 'screens/Movie'
-
-import { navigationRef } from './NavigationService'
+import { MainScreen } from 'screens/main/screen'
+import { MovieScreen } from 'screens/movie/screen'
 
 const Stack = createStackNavigator()
 
-function App() {
+export function App() {
   const { theme } = useTheme()
 
-  const isDark = useSelector((state: IThemeReducerState) => state.themeReducer.isDark)
-  const favorites = useSelector((state: IFavoriteReducerState) => state.favoriteReducer.favorites)
-  const hidden = useSelector((state: IHideReducerState) => state.hideReducer.hidden)
+  const isDark = useSelector((state: ThemeReducerStateInterface) => state.themeReducer.isDark)
+  const favorites = useSelector(
+    (state: FavoriteReducerStateInterface) => state.favoriteReducer.favorites,
+  )
+  const hidden = useSelector((state: HideReducerStateInterface) => state.hideReducer.hidden)
   const dispatch = useDispatch()
+  const navigationRef = React.createRef<NavigationContainerRef>()
 
   const handlePressMovie = useCallback(
     movie => {
@@ -62,6 +65,8 @@ function App() {
     },
     [dispatch, hidden],
   )
+  const insideFavorites = useCallback((movie: FoundMovie) => favorites[movie.imdbID], [favorites])
+  const insideHidden = useCallback((movie: FoundMovie) => hidden[movie.imdbID], [hidden])
 
   return (
     <ThemeProviderPaper theme={theme.dark ? DarkTheme : DefaultTheme}>
@@ -79,9 +84,10 @@ function App() {
                 <MainScreen
                   {...props}
                   favorites={favorites}
-                  hidden={hidden}
+                  insideFavorites={insideFavorites}
+                  insideHidden={insideHidden}
                   isDark={isDark}
-                  theme={theme}
+                  theme={theme as any}
                   onPressMovie={handlePressMovie}
                   onPressToggleFavorite={handlePressToggleFavorite}
                   onPressToggleHide={handlePressToggleHide}
@@ -96,9 +102,8 @@ function App() {
               {props => (
                 <MovieScreen
                   {...props}
-                  favorites={favorites}
-                  hidden={hidden}
-                  isDark={isDark}
+                  insideFavorites={insideFavorites}
+                  insideHidden={insideHidden}
                   onPressToggleFavorite={handlePressToggleFavorite}
                   onPressToggleHide={handlePressToggleHide}
                 />
@@ -110,5 +115,3 @@ function App() {
     </ThemeProviderPaper>
   )
 }
-
-export default App

@@ -2,18 +2,26 @@
  * Loading reducer made separate for easy blacklisting
  * Avoid data persist
  */
-import createReducer from 'lib/createReducer'
-import { IHideToggleAction } from 'models/actions/hide'
-import { IHideState } from 'models/reducers/hide'
+import { createReducer } from 'lib/createReducer'
+import { FoundMovie } from 'models/movie'
 
+import { HideToggleActionInterface } from 'store/actions/hideActions'
 import * as types from 'store/actions/types'
 
-const initialState: IHideState = {
+export interface HideStateInterface {
+  hidden: { [id: string]: FoundMovie }
+}
+
+export interface HideReducerStateInterface {
+  hideReducer: HideStateInterface
+}
+
+const initialState: HideStateInterface = {
   hidden: {},
 }
 
 export const hideReducer = createReducer(initialState, {
-  [types.TOGGLE_HIDDEN](state: IHideState, action: IHideToggleAction) {
+  [types.TOGGLE_HIDDEN](state: HideStateInterface, action: HideToggleActionInterface) {
     return { ...state, hidden: action.hidden }
   },
 })

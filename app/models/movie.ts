@@ -5,3 +5,4 @@ export type FoundMovie = {
   imdbRating: string
   Title: string
 }
+export type MaybeFoundMovies = FoundMovie[] | null

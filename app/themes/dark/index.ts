@@ -1,9 +1,9 @@
 import { DarkTheme as NavigationDarkTheme } from '@react-navigation/native'
 import { DarkTheme as PaperDarkTheme } from 'react-native-paper'
-import colors from 'themes/dark/colors'
-import palette from 'themes/main/palette'
+import { colors } from 'themes/dark/colors'
+import { palette } from 'themes/dark/palette'
 
-const theme = {
+export const theme = {
   ...PaperDarkTheme,
   ...NavigationDarkTheme,
   colors: {
@@ -17,4 +17,3 @@ const theme = {
     ...colors,
   },
 }
-export default theme
