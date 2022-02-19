@@ -17,10 +17,8 @@ Guitar chords for famous songs - includes tabs, sounds and lyrics
 ## How this looks
 
   <p align="left">
-    <img width="700" src="/captures/movie-scout-dark.jpg" alt="screenshot" />
-  </p>
-  <p align="left">
-    <img width="700" src="/captures/movie-scout-light.jpg" alt="screenshot" />
+    <img width="400" src="/captures/movie-scout-dark.jpg" alt="screenshot" />
+    <img width="400" src="/captures/movie-scout-light.jpg" alt="screenshot" />
   </p>
 
 ## Prerequisites
