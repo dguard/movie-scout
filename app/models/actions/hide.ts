@@ -1,4 +1,4 @@
-import { FoundMovie } from 'models/reducers/favorite'
+import { FoundMovie } from 'models/movie'
 
 export interface IHideToggleAction {
   hidden: { [id: string]: FoundMovie }

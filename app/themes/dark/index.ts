@@ -10,7 +10,10 @@ const theme = {
     ...NavigationDarkTheme.colors,
     background: palette.grayUmber,
     card: palette.lightGray,
-    text: palette.white,
+    text: '#f5f5f5',
+    accent: '#ffffff',
+    primary: 'gray',
+    placeholder: '#f5f5f5',
     ...colors,
   },
 }

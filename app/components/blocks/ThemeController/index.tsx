@@ -1,18 +1,14 @@
 import React from 'react'
 import { Switch } from 'react-native'
-import { IThemeState } from 'models/reducers/theme'
+import { IThemeReducerState } from 'models/reducers/theme'
 import { useDispatch, useSelector } from 'react-redux'
 
 import * as themeActions from 'store/actions/themeActions'
 
 import { Row, StyledIcon } from './styles'
 
-export interface IState {
-  themeReducer: IThemeState
-}
-
-const ThemeController: React.FC = () => {
-  const isDark = useSelector((state: IState) => state.themeReducer.isDark)
+function ThemeController() {
+  const isDark = useSelector((state: IThemeReducerState) => state.themeReducer.isDark)
 
   const dispatch = useDispatch()
   const handleToggleTheme = () => dispatch(themeActions.setIsDarkTheme(!isDark) as any)

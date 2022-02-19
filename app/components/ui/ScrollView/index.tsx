@@ -1,8 +1,9 @@
 import { ScrollView as ScrollViewInternal } from 'react-native'
 import styled from 'styled-components/native'
-import { layout, LayoutProps } from 'styled-system'
+import { layout, LayoutProps, margin, MarginProps } from 'styled-system'
 
-type ScrollViewProps = LayoutProps
+type ScrollViewProps = LayoutProps & MarginProps
 export const ScrollView = styled(ScrollViewInternal)<ScrollViewProps>`
   ${layout}
+  ${margin}
 `

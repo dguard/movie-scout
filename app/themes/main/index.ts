@@ -11,10 +11,13 @@ export default {
   ...NavigationDefaultTheme,
   colors: {
     ...NavigationDarkTheme.colors,
-    background: palette.grayUmber,
-    card: palette.darkBrown,
-    text: palette.white,
+    background: '#fff',
+    card: palette.grayUmber,
     backdrop: 'transparent',
+    text: palette.grayUmberLight,
+    accent: palette.grayUmber,
+    primary: 'gray',
+    placeholder: palette.grayUmber,
     ...colors,
   },
 }

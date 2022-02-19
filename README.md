@@ -10,6 +10,19 @@
 
 </p>
 
+## Description
+
+Guitar chords for famous songs - includes tabs, sounds and lyrics
+
+## How this looks
+
+  <p align="left">
+    <img width="700" src="/captures/movie-scout-dark.jpg" alt="screenshot" />
+  </p>
+  <p align="left">
+    <img width="700" src="/captures/movie-scout-light.jpg" alt="screenshot" />
+  </p>
+
 ## Prerequisites
 
 - [Node](https://nodejs.org) v12 (it is recommended to install it via [NVM](https://github.com/creationix/nvm))

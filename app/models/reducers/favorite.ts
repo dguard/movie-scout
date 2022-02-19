@@ -1,11 +1,9 @@
-export type FoundMovie = {
-  imdbID: string
-  Poster: string
-  imdbVotes: string
-  imdbRating: string
-  Title: string
-}
+import { FoundMovie } from 'models/movie'
 
 export interface IFavoriteState {
   favorites: { [id: string]: FoundMovie }
+}
+
+export interface IFavoriteReducerState {
+  favoriteReducer: IFavoriteState
 }

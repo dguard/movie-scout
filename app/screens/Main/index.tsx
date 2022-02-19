@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import NetInfo from '@react-native-community/netinfo'
 import axios from 'axios'
-import { IState } from 'components/blocks/ThemeController'
 import { Button, Column, Icon, Image, Row, ScrollView, Text, TextInput } from 'components/ui'
-import { FoundMovie, IFavoriteState } from 'models/reducers/favorite'
-import { IHideState } from 'models/reducers/hide'
+import { FoundMovie } from 'models/movie'
+import { IFavoriteState, IHideState } from 'models/reducers'
 import { Checkbox } from 'react-native-paper'
-import { useDispatch, useSelector } from 'react-redux'
 
 import {
   accessPointNetworkOffIcon,
@@ -19,41 +17,43 @@ import {
   starIcon,
 } from 'assets'
 
-import * as favoriteActions from 'store/actions/favoriteActions'
-import * as hiddenActions from 'store/actions/hideActions'
+import { API_HOST } from 'config/constants'
 
-const dimensions = Dimensions.get('window')
-console.log('dimensions', dimensions)
-
-interface IFavoriteReducerState {
-  favoriteReducer: IFavoriteState
+type Props = {
+  onPressToggleFavorite?: (value) => void
+  onPressToggleHide?: (value) => void
+  onPressMovie?: (value) => void
+  isDark: boolean
+  favorites: IFavoriteState['favorites']
+  hidden: IHideState['hidden']
+  theme: any
 }
 
-interface IHideReducerState {
-  hideReducer: IHideState
-}
+const TYPING_DELAY = 300
 
-function MainScreen() {
+function MainScreen({
+  onPressToggleFavorite,
+  onPressToggleHide,
+  onPressMovie,
+  isDark,
+  favorites,
+  hidden,
+  theme,
+}: Props) {
   const [searchAndFilter, setSearchAndFilter] = useState('the lord')
-  const [foundMovies, setFoundMovies] = useState<FoundMovie[] | null>()
+  const [foundMovies, setFoundMovies] = useState<FoundMovie[] | null>(null)
   const [isConnected, setIsConnected] = useState<boolean | null>(null)
-  const [updatedTime, setUpdatedTime] = useState<number | undefined>(undefined)
-  const isDark = useSelector((state: IState) => state.themeReducer.isDark)
-  const favorites = useSelector((state: IFavoriteReducerState) => state.favoriteReducer.favorites)
-  const hidden = useSelector((state: IHideReducerState) => state.hideReducer.hidden)
   const [displayHidden, setDisplayHidden] = useState<boolean>(false)
   const [showFavorites, setShowFavorites] = useState<boolean>(true)
-
-  const dispatch = useDispatch()
+  const [typingTimeout, setTypingTimeout] = useState<any>(undefined)
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: any) => {
-      console.log('state.isConnected', state.isConnected)
+    NetInfo.addEventListener((state: any) => {
       if (isConnected !== state.isConnected) {
         setIsConnected(state.isConnected)
       }
     })
-  }, [])
+  }, [isConnected])
 
   useEffect(() => {
     const searchData = async () => {
@@ -62,15 +62,11 @@ function MainScreen() {
         setIsConnected(newIsConnected)
         return
       }
-      setFoundMovies(undefined)
+      setFoundMovies(null)
 
       let resp: FoundMovie[] | null = null
       try {
-        resp = (
-          await axios.get(
-            `http://ec2-3-129-72-17.us-east-2.compute.amazonaws.com:8888/movies?title=${searchAndFilter}`,
-          )
-        ).data
+        resp = (await axios.get(`${API_HOST}/movies?title=${searchAndFilter}`)).data
       } catch (error) {
         console.error(error)
         setIsConnected(false)
@@ -78,46 +74,35 @@ function MainScreen() {
       }
 
       if (resp && resp.length) {
-        setUpdatedTime(Number(new Date()))
+        setIsConnected(true)
         setFoundMovies(resp.slice(0, 100))
       }
     }
 
-    searchData()
+    if (typingTimeout) {
+      clearTimeout(typingTimeout)
+    }
+    const newTimeout: any = setTimeout(() => {
+      searchData()
+    }, TYPING_DELAY)
+    setTypingTimeout(newTimeout)
   }, [searchAndFilter])
 
   const handleChangeSearch = useCallback(value => setSearchAndFilter(value), [])
 
-  const handlePressToggleFavorite = useCallback(
-    (movie: FoundMovie) => {
-      const newFavorites = JSON.parse(JSON.stringify(favorites))
-      if (newFavorites[movie.imdbID]) {
-        delete newFavorites[movie.imdbID]
-      } else {
-        newFavorites[movie.imdbID] = movie
-      }
-      dispatch(favoriteActions.setFavorites(newFavorites))
-    },
-    [dispatch, favorites],
-  )
-  const handlePressToggleHide = useCallback(
-    (movie: FoundMovie) => {
-      const newHidden = JSON.parse(JSON.stringify(hidden))
-      if (newHidden[movie.imdbID]) {
-        delete newHidden[movie.imdbID]
-      } else {
-        newHidden[movie.imdbID] = movie
-      }
-      dispatch(hiddenActions.setHidden(newHidden))
-    },
-    [dispatch, hidden],
-  )
   const insideFavorites = useCallback((movie: FoundMovie) => favorites[movie.imdbID], [favorites])
   const insideHidden = useCallback((movie: FoundMovie) => hidden[movie.imdbID], [hidden])
 
   return (
     <Column bg={isDark ? '#000000' : '#fff'} px={2} py={2} stretch>
-      <TextInput label="Search" mb={2} value={searchAndFilter} onChangeText={handleChangeSearch} />
+      <TextInput
+        label="Search"
+        mb={2}
+        theme={theme}
+        underlineColorAndroid="#f5f5f5"
+        value={searchAndFilter}
+        onChangeText={handleChangeSearch}
+      />
 
       {!isConnected && (
         <Row alignCenter>
@@ -137,30 +122,33 @@ function MainScreen() {
           <Text color={isDark ? '#fff' : '#000'} fontSize={2} mb={2} bold>
             Favorites
           </Text>
-          <ScrollView style={{ marginBottom: 8 }} horizontal>
+          <ScrollView mb={3} horizontal>
             {Object.keys(favorites).map(key => {
               const movie: FoundMovie = favorites[key]
+              const time = Number(new Date())
 
               return (
-                <Column
-                  bg={isDark ? '#1a1a1a' : '#dedede'}
-                  height={250}
-                  key={`${updatedTime}_${movie.imdbID}`}
-                  mr={3}
-                  width={105}>
-                  <Image height={150} mr={3} source={{ uri: movie.Poster }} width={105} />
-                  <Column px={2} py={2} stretch>
-                    <Row mb={2} alignCenter>
-                      <Icon height={15} mr={1} source={starIcon} width={15} />
+                <Button key={`${time}_${movie.imdbID}`} onPress={() => onPressMovie?.(movie)}>
+                  <Column
+                    bg={isDark ? '#1a1a1a' : '#dedede'}
+                    height={250}
+                    key={`${time}_${movie.imdbID}`}
+                    mr={3}
+                    width={105}>
+                    <Image height={150} mr={3} source={{ uri: movie.Poster }} width={105} />
+                    <Column px={2} py={2} stretch>
+                      <Row mb={2} alignCenter>
+                        <Icon height={15} mr={1} source={starIcon} width={15} />
+                        <Text color={isDark ? '#fff' : '#000'} wrap>
+                          {movie.imdbRating}
+                        </Text>
+                      </Row>
                       <Text color={isDark ? '#fff' : '#000'} wrap>
-                        {movie.imdbRating}
+                        {movie.Title}
                       </Text>
-                    </Row>
-                    <Text color={isDark ? '#fff' : '#000'} wrap>
-                      {movie.Title}
-                    </Text>
+                    </Column>
                   </Column>
-                </Column>
+                </Button>
               )
             })}
           </ScrollView>
@@ -170,39 +158,47 @@ function MainScreen() {
         <Button
           borderRadius={10}
           height={50}
-          width={200}
+          width={100}
           alignCenter
           row
           onPress={() => setShowFavorites(!showFavorites)}>
-          <Checkbox status={showFavorites ? 'checked' : 'unchecked'} onPress={() => {}} />
+          <Checkbox
+            status={showFavorites ? 'checked' : 'unchecked'}
+            theme={theme}
+            onPress={() => {}}
+          />
           <Text color={isDark ? '#fff' : '#000'}>Favorites</Text>
         </Button>
         <Button
           borderRadius={10}
           height={50}
-          width={200}
+          width={100}
           alignCenter
           row
           onPress={() => setDisplayHidden(!displayHidden)}>
-          <Checkbox status={displayHidden ? 'checked' : 'unchecked'} onPress={() => {}} />
+          <Checkbox
+            status={displayHidden ? 'checked' : 'unchecked'}
+            theme={theme}
+            onPress={() => {}}
+          />
           <Text color={isDark ? '#fff' : '#000'}>Hidden</Text>
         </Button>
       </Row>
       <ScrollView>
         {foundMovies &&
           foundMovies.map(movie => {
-            if (insideHidden(movie) && displayHidden === false) {
+            if (insideHidden(movie) && !displayHidden) {
               return <View />
             }
+            const time = Number(new Date())
             return (
-              <Row
-                bg={isDark ? '#1a1a1a' : '#dedede'}
-                key={`${updatedTime}_${movie.imdbID}`}
-                mb={10}>
-                <Image height={200} mr={3} source={{ uri: movie.Poster }} width={140} />
+              <Row bg={isDark ? '#1a1a1a' : '#dedede'} key={`${time}_${movie.imdbID}`} mb={10}>
+                <Button onPress={() => onPressMovie?.(movie)}>
+                  <Image height={200} mr={3} source={{ uri: movie.Poster }} width={140} />
+                </Button>
                 <Column px={2} py={2} stretch>
                   <Row mb={2} alignCenter>
-                    <Icon height={30} mr={1} source={starIcon} width={30} />
+                    <Icon height={30} ml={-1} mr={1} source={starIcon} width={30} />
                     <Text color={isDark ? '#fff' : '#000'} wrap>
                       {movie.imdbRating}
                     </Text>
@@ -212,24 +208,24 @@ function MainScreen() {
                   </Text>
                   <Row>
                     <Button
-                      bg="#2c2c2c"
+                      bg={isDark ? '#1e1e1e' : '#cecece'}
                       borderRadius={10}
-                      height={50}
+                      height={65}
                       width={75}
                       alignCenter
                       justifyCenter
-                      onPress={() => handlePressToggleFavorite(movie)}>
+                      onPress={() => onPressToggleFavorite?.(movie)}>
                       {(insideFavorites(movie) && (
                         <Icon height={30} source={favoriteIcon} width={30} />
                       )) || <Icon height={30} source={favoriteBorderWhiteIcon} width={30} />}
                     </Button>
                     <Button
                       borderRadius={10}
-                      height={50}
+                      height={65}
                       width={75}
                       alignCenter
                       justifyCenter
-                      onPress={() => handlePressToggleHide(movie)}>
+                      onPress={() => onPressToggleHide?.(movie)}>
                       {(insideHidden(movie) && (
                         <Icon height={30} source={eyeSlashBlueIcon} width={30} />
                       )) || <Icon height={30} source={eyeSlashWhiteIcon} width={30} />}
