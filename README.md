@@ -14,6 +14,11 @@
 
 Explorer Movies from IMDB
 
+| Service         | Repo                                                         |
+|-----------------|--------------------------------------------------------------|
+| React Native 📦 | [movie-scout] (you are inside)                               |
+| API 🐍          | [movie-scout-api](https://github.com/dguard/movie-scout-api) |
+
 ## How this looks
 
   <p align="left">
