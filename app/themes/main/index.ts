@@ -1,7 +1,4 @@
-import {
-  DarkTheme as NavigationDarkTheme,
-  DefaultTheme as NavigationDefaultTheme,
-} from '@react-navigation/native'
+import { DefaultTheme as NavigationDefaultTheme } from '@react-navigation/native'
 import { DefaultTheme as PaperDefaultTheme } from 'react-native-paper'
 import { colors } from 'themes/main/colors'
 import { palette } from 'themes/main/palette'
@@ -10,7 +7,7 @@ export const theme = {
   ...PaperDefaultTheme,
   ...NavigationDefaultTheme,
   colors: {
-    ...NavigationDarkTheme.colors,
+    ...NavigationDefaultTheme.colors,
     background: '#fff',
     card: palette.grayUmber,
     backdrop: 'transparent',

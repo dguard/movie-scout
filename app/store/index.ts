@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { applyMiddleware, compose, createStore } from 'redux'
 import { persistCombineReducers, persistStore } from 'redux-persist'
 
-import { rootReducers } from 'store/reducers'
+import { rootReducers } from './reducers'
 
 const config = {
   key: 'root',
